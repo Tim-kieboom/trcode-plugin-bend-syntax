@@ -1,0 +1,69 @@
+id = "bend-syntax"
+name = "Bend"
+version = "0.0.1"
+abi = "1.12"
+# A language and nothing else: no module of its own and no pane. The grammar is the file the
+# installer downloads and checks.
+
+[language]
+name = "Bend"
+grammar = "bend.wasm"
+grammar_name = "bend2"
+extensions = ["bend"]
+comment = "#"
+# The query is the grammar's own (queries/highlights.scm of https://github.com/Soulthym/tree-sitter-bend2, v0.3.0 (3819b83)).
+# Captures that themes do not have a color for are renamed to ones they do: @character to @string, @number.float to @number, @variable.member to @property, @string.special.path to @string, @function.call to @function, @type.definition and @type.builtin to @type, @keyword.conditional, @keyword.return to @keyword.control, @keyword.import and @keyword.modifier to @keyword, @module to @namespace.
+# The patterns are in the opposite order of the grammar's file: TerminalCode takes the first of two
+# patterns on the same text, and that file is written for the last (as Neovim and Zed take it).
+highlights = '''
+["->" "=>" "<-" "=" "==" "!=" "@" "\\" "~"
+ "+" "-" "*" "/" "%" "<" ">" "<=" ">=" "<<" ">>"
+ "&" "|" "&&" "||" "<>" "++" "<&>" ".&." ".|." ".^." "^"] @operator
+["," ";" ":"] @punctuation.delimiter
+["(" ")" "[" "]" "{" "}"] @punctuation.bracket
+"Base" @namespace
+["import" "as"] @keyword
+"return" @keyword.control
+["match" "case"] @keyword.control
+["def" "type" "law" "is" "where" "for" "exs" "do"] @keyword
+(gpu_call "!" @keyword)
+(function_definition "?" @attribute)
+(decorator) @attribute
+(foreign_import path: (string) @string)
+(import_path) @string
+(import_statement alias: (module_alias) @namespace)
+(do_binding name: (identifier) @variable)
+(lambda_expression parameter: (parenthesized_expression body: (body (reusable_expression (identifier) @variable.parameter))))
+(lambda_expression parameter: (parenthesized_expression body: (body (identifier) @variable.parameter)))
+(lambda_expression parameter: (reusable_expression (identifier) @variable.parameter))
+(lambda_expression parameter: (identifier) @variable.parameter)
+(dependent_type name: (identifier) @variable.parameter)
+(law_clause name: (identifier) @variable.parameter)
+(constructor_definition (type_parameter name: (identifier) @property))
+(type_parameter name: (identifier) @variable.parameter)
+(parameter name: (identifier) @variable.parameter)
+(do_expression monad: (identifier) @type)
+(call_expression function: (identifier) @function)
+(type_application name: (identifier) @type)
+(eliminator_arm name: (identifier) @constructor)
+(constructor_expression name: (identifier) @constructor)
+(constructor_definition name: (identifier) @constructor)
+(type_definition name: (identifier) @type)
+(law_definition name: (identifier) @function)
+(function_definition name: (identifier) @function)
+(reflexivity) @constant.builtin
+(hole) @variable.builtin
+"Kind" @type
+(builtin_type) @type
+(quantity) @constant.builtin
+(float) @number
+(natural) @number
+(integer) @number
+(escape_sequence) @string.escape
+(character) @string
+(string) @string
+(comment) @comment
+((identifier) @type
+  (#match? @type "^[A-Z]"))
+(identifier) @variable
+'''
